@@ -69,8 +69,12 @@
           if (!response.ok || !data.url) throw new Error(data.error || "UNAVAILABLE");
           const url = new URL(data.url);
           if (url.protocol !== "https:") throw new Error("BAD_LINK");
-          window.open(url.href, "_blank", "noopener,noreferrer");
-          link.textContent = "再次打开推广链接";
+          const open = document.createElement("a");
+          open.href = url.href;
+          open.target = "_blank";
+          open.rel = "noopener noreferrer";
+          open.textContent = "打开推广链接";
+          link.replaceWith(open);
         } catch { link.textContent = "链接暂不可用，稍后重试"; }
         finally { link.disabled = false; }
       });

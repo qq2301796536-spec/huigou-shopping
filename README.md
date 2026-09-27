@@ -1,31 +1,32 @@
 # 慧购分析助手
 
-独立个人商品比价工具。官网由 GitHub Pages 免费托管，目前手动单价比较已可使用；实时搜索的前端与安全后端已经编写，但需要独立完成云端部署和接口权限验证才能启用。商品搜索只覆盖多多客允许查询的可推广商品，不能宣称全平台最低价、完整买家评价或个人实际结算价格。
+独立个人商品比价工具，已上线公开官网，后端部署在独立的 Cloudflare Worker 免费服务上。
 
-## 文件与功能
+- 官网：https://qq2301796536-spec.github.io/huigou-shopping/
+- 后端健康检查：https://huigou-ddk-api.qq2301796536.workers.dev/api/health
+- 当前进度：手动单价比较已可使用，实时商品搜索界面和后端已部署。**真正的多多客商品查询尚需安全配置 API 凭据、验证接口权限，配置完成前前端搜索按钮保持禁用。**
 
-- `index.html`、`search.css`、`search.js`：响应式官网、手动比价、待激活的商品搜索与结果展示。
-- `api-config.js`：只填写公开的 Worker 地址；**禁止填入任何 API 凭据**。
-- `server/worker.mjs`：服务端签名、商品查询、参考券后价、可选推广链接生成、输入校验、错误处理和轻量限流。
-- `server/worker.test.mjs`：使用模拟平台响应的离线自动化测试，不读取真实凭据。
-- `server/wrangler.toml`：Cloudflare Worker 配置；不含应用密钥。
-- `privacy.html`：隐私及数据处理说明。
-- `callback.html`：仅为静态开发占位页，**不能处理 OAuth 授权回调**。
-- `app-icon.png`：260×260 应用图标。
+## 技术实现
 
-## 部署步骤（需要本人登录 Cloudflare）
+- `index.html`、`search.css`、`search.js`：手机端自适应的手动比价与待启用实时商品搜索界面。
+- `api-config.js`：只存放公开的 Worker URL，绝不放任何密钥。
+- `server/worker.mjs`：服务器端 API 请求签名、搜索、参考券后价、可选推广链接、请求校验和限流。
+- `server/wrangler.toml`：免费 Worker 发布配置，包含兼容 Node Crypto 的标志。
+- `server/worker.test.mjs`：不使用真实凭据的单元测试。
+- `privacy.html`：输入数据和托管服务说明；`callback.html` 是静态占位页，**不是可用的 OAuth 授权回调处理器**。
 
-1. 从项目根目录运行 `npx wrangler@latest login`，在浏览器里授权本人 Cloudflare 账户。
-2. 运行 `npx wrangler@latest deploy --config server/wrangler.toml`，记录得到的 HTTPS `*.workers.dev` 地址。
-3. 在**本机终端**运行以下命令，按提示直接输入凭据，避免将凭据交给聊天或公开仓库：`npx wrangler@latest secret put PDD_CLIENT_ID --config server/wrangler.toml` 和 `npx wrangler@latest secret put PDD_CLIENT_SECRET --config server/wrangler.toml`。生成推广链接还需要可用的推广位 PID：`npx wrangler@latest secret put PDD_PID --config server/wrangler.toml`。
-4. 如果平台接口要求授权令牌，可在确认授权流程及权限范围后另行配置 `PDD_ACCESS_TOKEN`；当前静态 callback 页面无法取得或刷新令牌，须部署真实服务端回调。
-5. 访问 Worker 的 `/api/health`，`configured: true` 只表示必要密钥已设置，**不等于真实接口调用通过**。使用浏览器官网完成一次商品关键词真实查询，检查接口权限与结果。
-6. 真实查询成功后，把 Worker 的 HTTPS 根网址写入公开 `api-config.js` 的 `HUIGOU_API_BASE` 值，提交并推送 `main`。GitHub Pages 会自动部署前端。不得在公共文件写入应用密钥、Cookie 或 Access Token。
+## 下一步：由账户本人在电脑上配置密钥
 
-## 安全和限制
+电脑的 AgentDock 文件夹内准备有私有的 `huigou-configure-secrets.cmd`，没有上传到公开 GitHub。双击后根据提示，在**电脑本地终端**依次输入自己拼多多开放平台应用的 Client ID 和 Client Secret；切勿把密钥发到聊天或提交到代码仓库。脚本调用 Wrangler 将两项凭据写入 Cloudflare Secrets。
 
-后端只应保留在有秘密存储功能的平台；密钥通过 Cloudflare Secrets 管理。开发时不得上传 `.dev.vars`、`.env` 或包含凭据的截图。内存 IP 限流只是尽力防滥用；正式公开流量较大时，需要在云平台配置持久化限速和防机器人策略。官网只允许本域跨域访问，但 HTTP Origin 并不是身份认证。
+如果在其他电脑上操作，进入 `server` 目录先运行 `npm.cmd ci --include=optional --no-audit --no-fund`，再逐一运行 `node node_modules/wrangler/bin/wrangler.js secret put PDD_CLIENT_ID` 和 `node node_modules/wrangler/bin/wrangler.js secret put PDD_CLIENT_SECRET`。Linux/macOS 则用 `npm` 而非 `npm.cmd`。若 Cloudflare 需要登录，可先运行 `node node_modules/wrangler/bin/wrangler.js login`。
 
-商品搜索参考价取自接口返回，预估券后价只有满足已知优惠券门槛、时间与余量时才展示。平台实际可用权限、搜索范围、推广位绑定和令牌要求，必须通过本人后台及真实接口确认。买家追评与个人结算价不是本项目目前已验证的能力。
+配置完成后，通过 Worker 的 `/api/health` 核查 `configured:true`。注意这**仅代表凭据已配置**，不保证平台授予实际搜索权限；须在官网执行一次真实商品查询才能确认。
 
-测试：项目根目录执行 `node --test server/worker.test.mjs`；前端脚本可用 `node --check search.js` 检查语法。
+推广链接还需要在有推广位的前提下设置 `PDD_PID` Secret。买家完整评论/追评以及个人结算页最终付款金额不是目前已验证的多多客接口能力。
+
+## 维护与安全
+
+所有请求在 Worker 服务器端签名；公开 GitHub Pages 不存储 Client Secret、Access Token、密码或 Cookie。当前仅有尽力的内存限流，公开规模较大时要额外配置 Cloudflare 限流和反滥用规则。GitHub Pages 或 workers.dev 在部分中国大陆网络下的访问可能不稳定。
+
+项目根目录运行 `node --test server/worker.test.mjs`、`node --check search.js`。在 `server` 目录运行 `node node_modules/wrangler/bin/wrangler.js deploy` 更新后端。

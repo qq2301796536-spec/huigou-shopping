@@ -21,7 +21,7 @@
 .goods-price small{font-size:12px;color:#617a72;font-weight:400}
 .goods-coupon{display:inline-block;background:#fff2e6;color:#ac5624;font-size:12px;padding:2px 8px;border-radius:6px;align-self:flex-start}
 .goods-actions{display:flex;gap:8px;margin-top:auto;padding-top:8px;flex-wrap:wrap}
-.goods-actions button{padding:7px 11px;border:1px solid #c8ded4;background:#f6faf7;color:#176b58;border-radius:8px;cursor:pointer}
+.goods-actions button,.goods-actions a{padding:7px 11px;border:1px solid #c8ded4;background:#f6faf7;color:#176b58;border-radius:8px;cursor:pointer;text-decoration:none;font:inherit;font-size:13px}
 .goods-empty{padding:26px;text-align:center;color:#687f75;border:1px dashed #ccdfd6;border-radius:12px}
 .search-paging{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:24px}
 .search-paging button{padding:8px 17px;border:1px solid #c6d9d3;border-radius:9px;background:#fff;color:#175f54;cursor:pointer}
