@@ -1,0 +1,7 @@
+name = "huigou-ddk-api"
+main = "worker.mjs"
+compatibility_date = "2026-09-27"
+workers_dev = true
+
+[vars]
+SITE_ORIGIN = "https://qq2301796536-spec.github.io"

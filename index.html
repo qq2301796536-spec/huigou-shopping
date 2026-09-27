@@ -6,6 +6,7 @@
   <meta name="description" content="慧购分析助手，个人商品信息查询和比价辅助工具。帮助比较相同规格商品的实际价格，商品搜索接口正在接入。">
   <meta name="theme-color" content="#104b46">
   <link rel="icon" type="image/png" href="./app-icon.png">
+  <link rel="stylesheet" href="./search.css">
   <title>慧购分析助手｜轻松比较，认真挑选</title>
   <style>
     :root{--ink:#17312f;--muted:#617774;--teal:#076a60;--mint:#e9f7ef;--line:#dce8e4;--cream:#fbfcf9;--warn:#92692a}
@@ -34,13 +35,27 @@
   </style>
 </head>
 <body>
-  <header><nav class="wrap"><a href="./" class="brand"><img src="./app-icon.png" alt="慧购图标">慧购分析助手</a><div class="navlinks"><a href="#compare">体验比价</a><a href="#how">功能规划</a><a href="./privacy.html">隐私说明</a></div></nav></header>
+  <header><nav class="wrap"><a href="./" class="brand"><img src="./app-icon.png" alt="慧购图标">慧购分析助手</a><div class="navlinks"><a href="#search">商品搜索</a><a href="#compare">手动比价</a><a href="#how">功能规划</a><a href="./privacy.html">隐私说明</a></div></nav></header>
   <main>
     <div class="hero"><div class="wrap"><span class="eyebrow">个人购物辅助工具 · 开发测试中</span><h1>更清楚的价格，<br>更有依据的选择。</h1>
       <p>帮你比较同类商品的规格与单价。计划接入已获授权的商品搜索接口，结合买家评价、追评及个人结算页信息，让每一次购物更有把握。</p>
-      <div class="actions"><a href="#compare" class="btn primary">体验手动单价比较</a><a href="#how" class="btn secondary">了解开发计划</a></div>
+      <div class="actions"><a href="#search" class="btn primary">商品搜索接入进度</a><a href="#compare" class="btn secondary">体验手动单价比较</a></div>
       <div class="hero-note">独立个人工具，尚未接入实时商品数据。与任何电商平台均无官方隶属关系。</div>
     </div></div>
+    <section class="search-section" id="search"><div class="wrap">
+      <div class="section-heading"><h2>查询商品与优惠券</h2><p>多多客授权范围内的可推广商品 · 实际价格以商品结算页面为准</p></div>
+      <div class="search-shell">
+        <div id="liveStatus" class="search-status" role="status" aria-live="polite">正在检查实时搜索服务…</div>
+        <form id="liveSearchForm" class="search-form">
+          <div><label for="liveQuery">输入商品关键词</label><input id="liveQuery" placeholder="例如：豆腐猫砂、抽纸、充电器" maxlength="60" minlength="2" required autocomplete="off"></div>
+          <button id="liveSearchButton" class="btn primary" type="submit" disabled>搜索商品</button>
+        </form>
+        <p class="search-caption">接入中：搜索仅覆盖接口授权的可推广商品，展示的价格、优惠券和销量均有时效性。无法提供全平台最低价、完整买家追评或个人结算价。</p>
+        <div id="liveTools" class="search-tools" hidden><label for="liveSort">排序</label><select id="liveSort"><option value="default">接口默认顺序</option><option value="price">当前结果按参考价升序</option></select><span class="search-caption">排序仅对当前页有效</span></div>
+        <div id="liveResults" aria-live="polite"></div>
+        <div id="livePaging" class="search-paging" hidden><button type="button" id="livePrev">上一页</button><span id="livePage">第 1 页</span><button type="button" id="liveNext">下一页</button></div>
+      </div>
+    </div></section>
     <section class="wrap"><div class="section-heading"><h2>关注影响购买决定的四个方面</h2><p>价格直观，评价透明，规格可比</p></div>
       <div class="grid">
         <article class="feature"><div class="ico">¥</div><h3>真实单价</h3><p>按相同规格核算商品单价，计划对比券后到手价格。</p><span class="tag">商品接口待接入</span></article>
@@ -86,4 +101,6 @@
       document.getElementById("clear").addEventListener("click",()=>{rows.length=0;render()});
     })();
   </script>
+  <script src="./api-config.js"></script>
+  <script src="./search.js" defer></script>
 </body></html>

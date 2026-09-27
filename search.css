@@ -1,0 +1,30 @@
+/* Real-time search UI; inactive until the separate server is configured. */
+.search-section{background:#f3faf6;border-block:1px solid #d9e9df}
+.search-shell{max-width:1050px;margin:auto;border:1px solid #d5e6dc;border-radius:22px;background:#fff;padding:30px;box-shadow:0 10px 30px #17312f09}
+.search-form{display:grid;grid-template-columns:minmax(140px,1fr) auto;gap:10px;align-items:end}
+.search-form input{width:100%;min-width:0}
+.search-caption{font-size:13px;color:#56756e;margin-top:12px}
+.search-status{display:flex;align-items:center;gap:9px;margin-bottom:18px;font-size:13px;color:#815d26;background:#fff8e6;padding:11px 14px;border-radius:11px}
+.search-status.ok{color:#166153;background:#edf9f2}
+.search-status.error{color:#9a4333;background:#fff0ee}
+.search-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0 14px}
+.search-tools label{margin:0}
+.search-tools select{border:1px solid #c6d9d3;border-radius:9px;padding:7px 12px;background:#fff;color:#284d46}
+.search-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.goods-card{display:flex;flex-direction:column;background:white;border:1px solid #e3ede8;border-radius:16px;overflow:hidden;min-width:0}
+.goods-card img,.goods-image-placeholder{width:100%;aspect-ratio:4/3;object-fit:contain;background:#f6faf7}
+.goods-image-placeholder{display:grid;place-items:center;color:#7e9b8e}
+.goods-body{display:flex;flex-direction:column;gap:7px;padding:16px;flex:1}
+.goods-title{font-size:15px;line-height:1.5;font-weight:700;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:45px}
+.goods-mall,.goods-info,.goods-note{font-size:12px;color:#647c74;margin:0}
+.goods-price{font-size:23px;color:#087467;font-weight:800;line-height:1.3}
+.goods-price small{font-size:12px;color:#617a72;font-weight:400}
+.goods-coupon{display:inline-block;background:#fff2e6;color:#ac5624;font-size:12px;padding:2px 8px;border-radius:6px;align-self:flex-start}
+.goods-actions{display:flex;gap:8px;margin-top:auto;padding-top:8px;flex-wrap:wrap}
+.goods-actions button{padding:7px 11px;border:1px solid #c8ded4;background:#f6faf7;color:#176b58;border-radius:8px;cursor:pointer}
+.goods-empty{padding:26px;text-align:center;color:#687f75;border:1px dashed #ccdfd6;border-radius:12px}
+.search-paging{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:24px}
+.search-paging button{padding:8px 17px;border:1px solid #c6d9d3;border-radius:9px;background:#fff;color:#175f54;cursor:pointer}
+.search-paging button:disabled,.search-form button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:760px){.search-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.search-shell{padding:18px}.search-form{grid-template-columns:1fr}}
+@media(max-width:500px){.search-grid{grid-template-columns:1fr}.goods-card{display:grid;grid-template-columns:108px minmax(0,1fr)}.goods-card img,.goods-image-placeholder{aspect-ratio:1;height:100%}.goods-body{padding:12px;gap:5px}.goods-price{font-size:20px}}
