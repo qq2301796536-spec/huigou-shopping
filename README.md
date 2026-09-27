@@ -1,30 +1,30 @@
 # 慧购分析助手
 
-独立个人商品比价工具，公开官网使用 GitHub Pages，云端搜索后端使用 Cloudflare Workers 免费服务。
+一个独立的个人商品搜索与比价工具。官网使用 GitHub Pages，云端 API 使用 Cloudflare Workers。
 
 - 官网：https://qq2301796536-spec.github.io/huigou-shopping/
-- 云端状态：https://huigou-ddk-api.qq2301796536.workers.dev/api/health
-- 当前进度：手动比价和云端后端已上线。Client ID、Client Secret 已保存于 Cloudflare Secrets；多多进宝账号已由用户确认绑定，但真实搜索仍需已授权备案的推广位 PID，暂时不能提供真实商品查询结果。
+- 云端健康检查：https://huigou-ddk-api.qq2301796536.workers.dev/api/health
+- 当前状态：Client ID、Client Secret 和推广位 PID 安全保存在 Cloudflare Secrets；多多进宝授权已经完成，已通过真实多多客商品搜索和推广链接生成验证。
 
-## 技术实现
+## 已验证的功能
 
-- `index.html`、`search.css`、`search.js`：手机端官网、手动比价、待启用的多多客商品搜索及价格展示。
-- `api-config.js`：仅存放公开 Worker HTTPS 地址，不得存放任何凭据。
-- `server/worker.mjs`：在服务端完成签名、商品搜索、优惠券价格估算及可选推广链接生成。
-- `server/wrangler.toml`：Workers 部署配置；`server/worker.test.mjs`：模拟平台响应的离线测试。
-- `privacy.html`：隐私说明；`callback.html`：**静态占位页，无法处理 OAuth 授权回调。**
+2026 年 9 月 27 日授权完成后，实时调用 `pdd.ddk.goods.search`：
+- 搜索“豆腐猫砂”：HTTP 200，当前页 20 件可推广商品；本页发现 1 件符合已知优惠条件的商品，团购参考价 48.70 元、优惠券 20.00 元，预估券后价 28.70 元。注意价格和优惠券随时变化。
+- 搜索“抽纸”：HTTP 200，当前页 20 件可推广商品。本次查询当前页未发现可用优惠券。
+- 使用返回的一个商品 `goods_sign` 生成推广短链接：HTTP 200，域名属于拼多多。
 
-## 目前需要完成：推广位 PID 授权备案
+搜索仅覆盖多多客授权查询的可推广商品，不代表拼多多全平台，也不保证最低价格。最终应付金额以实际结算页面为准；当前不具备完整买家评价、追评或用户登录后结算价获取能力。
 
-用户完成「多多进宝账号绑定 Client ID」后，2026-09-27 再次实测 `pdd.ddk.goods.search`，拼多多返回 `error_code=50001`、`sub_code=60001`；相关接口说明将其解释为**未提供已经授权备案的推广位 PID / 自定义标识**。这与账号绑定是两个不同的步骤。仅凭 `/api/health` 的 `configured:true`，不能认定商品接口已可使用。
+## 技术结构
 
-1. 由账号本人登录 [多多进宝官方后台](https://jinbao.pinduoduo.com/)，找到推广位管理，确认自己已拥有推广位 PID。如尚无推广位，请按实际页面操作创建。
-2. 阅读 [多多进宝官方推广位备案说明](https://jinbao.pinduoduo.com/qa-system?questionId=204)，对将用于商品搜索的 PID 完成官方要求的授权备案。若实际页面要求本人登录、短信验证或点击授权，需本人完成；不应假称已经备案。
-3. 双击本机 `C:\Users\qq230\AgentDock\huigou-configure-pid.cmd`，按提示将**推广位 PID** 输入到本机终端。脚本执行 `wrangler secret put PDD_PID`；**不要误填应用 Client ID，也不用重新输入 Client Secret。** PID 会保存到 Cloudflare Secrets，而非公开 GitHub 仓库。
-4. 再次检查 `/api/health` 的 `links:true`，然后进行一次“豆腐猫砂”真实搜索。若仍返回 `PDD_PID_AUTH_REQUIRED`，核对备案 PID 与已设置的 PID 是否一致、是否已授权生效；必要时以平台官网要求为准。
+- `index.html`、`search.css`、`search.js`：响应式商品搜索、价格及优惠券参考展示、手动单价比较。
+- `api-config.js`：仅存放公开的 Worker HTTPS 地址，不得放入任何凭据。
+- `server/worker.mjs`：服务器端签名、搜索、券后价估算、推广链接及请求校验。
+- `server/wrangler.toml`：Workers 发布配置，`server/worker.test.mjs`：离线模拟测试。
+- `privacy.html`：隐私说明；`callback.html`：仅为静态开发占位页，**不能处理 OAuth 授权回调**。
 
-## 安全与能力边界
+## 部署与安全
 
-Cloudflare Worker 中的 Client Secret 不得复制到聊天、前端 JS、GitHub 或日志。公开网站只会拿到经服务端整理过的可推广商品数据；**商品搜索不是拼多多全站搜索**，参考券后价不等于用户结算页最终付款金额。目前不提供完整买家评价和追评；推广位未备案前不展示伪造商品结果。
+Cloudflare Secrets 保存 `PDD_CLIENT_ID`、`PDD_CLIENT_SECRET`、`PDD_PID`，不能把它们写入前端、公开 GitHub、访问日志或聊天。云端健康检查的配置布尔值只反映凭据是否存在；是否真正可用，须通过真实商品请求验证。
 
-项目根目录可运行 `node --test server/worker.test.mjs` 和 `node --check search.js`；`server` 目录运行 `node node_modules/wrangler/bin/wrangler.js deploy` 更新 Worker。Cloudflare 内存限流为尽力保护，正式面向较大访问量时还应设置云平台限流规则。部分中国大陆网络对 GitHub Pages / workers.dev 的访问可能不稳定。
+本机项目根目录可运行 `node --test server/worker.test.mjs`、`node --check search.js`。在 `server` 目录执行 `node node_modules/wrangler/bin/wrangler.js deploy` 更新后端。流量增大后应在 Cloudflare 另行配置边缘限流及防滥用规则。部分中国大陆网络可能无法稳定访问 GitHub Pages 或 workers.dev。
