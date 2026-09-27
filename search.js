@@ -123,9 +123,18 @@
       render();
     } catch (err) {
       const desc = err.message === "TOO_MANY_REQUESTS" ? "操作太频繁，请稍后重试。"
+        : err.message === "PDD_ACCOUNT_BINDING_REQUIRED"
+          ? "多多进宝账号尚未绑定当前应用的 Client ID，请完成绑定后重试。"
         : /^PDD_API_/.test(err.message) ? "商品接口返回错误 " + err.message + "，需核对平台权限。"
         : "暂时无法查询商品。请核对后端部署、密钥及接口权限。";
       msg(desc, "error");
+      if (err.message === "PDD_ACCOUNT_BINDING_REQUIRED") {
+        const help = document.createElement("a");
+        help.href = "https://jinbao.pinduoduo.com/third-party/rank";
+        help.target = "_blank"; help.rel = "noopener noreferrer";
+        help.textContent = "打开多多进宝绑定页面";
+        status.appendChild(help);
+      }
     } finally {
       pending = false; submit.disabled = false; prev.disabled = page <= 1;
       next.disabled = !current.length || current.length < 20 || (total > 0 && page * 20 >= total);

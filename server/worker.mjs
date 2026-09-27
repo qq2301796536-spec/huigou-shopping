@@ -53,14 +53,26 @@ async function callPdd(type, args, env) {
   const params = { client_id: env.PDD_CLIENT_ID, type, data_type: "JSON",
     timestamp: Math.floor(Date.now() / 1000), ...args };
   if (env.PDD_ACCESS_TOKEN) params.access_token = env.PDD_ACCESS_TOKEN;
-  params.sign = signParams(params, env.PDD_CLIENT_SECRET);
-  const response = await fetch(GATEWAY, { method: "POST", redirect: "error",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(params), signal: AbortSignal.timeout(12_000) });
+  try { params.sign = signParams(params, env.PDD_CLIENT_SECRET); }
+  catch { throw new Error("PDD_SIGN_FAILURE"); }
+  let response;
+  try {
+    response = await fetch(GATEWAY, { method: "POST", redirect: "manual",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(params), signal: AbortSignal.timeout(12_000) });
+  } catch (error) {
+    throw new Error(error?.name === "TimeoutError" || error?.name === "AbortError"
+      ? "PDD_TIMEOUT" : "PDD_FETCH_FAILURE");
+  }
   if (!response.ok) throw new Error("PDD_HTTP_" + response.status);
-  const result = await response.json();
+  let result;
+  try { result = await response.json(); }
+  catch { throw new Error("PDD_JSON_FAILURE"); }
   if (result.error_response) {
     const code = int(result.error_response.error_code);
+    const sub = String(result.error_response.sub_code || "").replace(/[^0-9]/g, "").slice(0, 8);
+    if (code === 50001 && sub === "20001")
+      throw new Error("PDD_ACCOUNT_BINDING_REQUIRED");
     throw new Error("PDD_API_" + code);
   }
   return result;
@@ -129,7 +141,10 @@ export default {
       })) throw new Error("PDD_LINK_FORMAT");
       return json({ url: link, disclosure: "推广链接，实际到手价以结算页为准" }, 200, headers);
     } catch (err) {
-      const code = /^PDD_(HTTP|API)_[0-9]+$/.test(err.message) ? err.message : "UPSTREAM_UNAVAILABLE";
+      const code = /^PDD_(HTTP|API)_[0-9]+$/.test(err.message) ||
+        ["PDD_SIGN_FAILURE", "PDD_FETCH_FAILURE", "PDD_TIMEOUT",
+         "PDD_JSON_FAILURE", "PDD_FORMAT", "PDD_ACCOUNT_BINDING_REQUIRED"].includes(err.message)
+        ? err.message : "UPSTREAM_UNAVAILABLE";
       return json({ error: code }, 502, headers);
     }
   }

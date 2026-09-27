@@ -131,3 +131,16 @@ test("reject off-platform promotion links", async () => {
     assert.equal((await response.json()).error,"UPSTREAM_UNAVAILABLE");
   } finally { globalThis.fetch = original; }
 });
+
+test("platform subcode 20001 becomes actionable account-binding error", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    error_response: { error_code: 50001, sub_code: "20001",
+      sub_msg: "account linkage required" }
+  }), {status:200});
+  try {
+    const response = await worker.fetch(request("/api/search?q=商品绑定"), testEnv);
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, "PDD_ACCOUNT_BINDING_REQUIRED");
+  } finally { globalThis.fetch = original; }
+});

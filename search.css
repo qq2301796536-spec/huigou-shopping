@@ -6,7 +6,7 @@
 .search-caption{font-size:13px;color:#56756e;margin-top:12px}
 .search-status{display:flex;align-items:center;gap:9px;margin-bottom:18px;font-size:13px;color:#815d26;background:#fff8e6;padding:11px 14px;border-radius:11px}
 .search-status.ok{color:#166153;background:#edf9f2}
-.search-status.error{color:#9a4333;background:#fff0ee}
+.search-status.error{color:#9a4333;background:#fff0ee;flex-wrap:wrap}.search-status a{text-decoration:underline;font-weight:700;white-space:nowrap}
 .search-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0 14px}
 .search-tools label{margin:0}
 .search-tools select{border:1px solid #c6d9d3;border-radius:9px;padding:7px 12px;background:#fff;color:#284d46}
