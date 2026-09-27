@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="慧购分析助手，个人商品信息查询和比价辅助工具。帮助比较相同规格商品的实际价格，商品搜索接口正在接入。">
+  <meta name="theme-color" content="#104b46">
+  <link rel="icon" type="image/png" href="./app-icon.png">
+  <title>慧购分析助手｜轻松比较，认真挑选</title>
+  <style>
+    :root{--ink:#17312f;--muted:#617774;--teal:#076a60;--mint:#e9f7ef;--line:#dce8e4;--cream:#fbfcf9;--warn:#92692a}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+    a{color:inherit;text-decoration:none} button,input,textarea{font:inherit} .wrap{width:min(1100px,calc(100% - 40px));margin:auto}
+    header{background:rgba(251,252,249,.94);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+    nav{height:75px;display:flex;align-items:center;justify-content:space-between;gap:12px} .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:21px;letter-spacing:-.3px}.brand img{width:37px;height:37px;border-radius:10px}
+    .navlinks{display:flex;gap:25px;color:var(--muted);font-size:14px}.navlinks a:hover,.smalllink:hover{color:var(--teal)}
+    .hero{padding:86px 0 70px;background:radial-gradient(ellipse at 90% 12%,#cff2db 0,transparent 47%),linear-gradient(155deg,#f9fff9 0%,#eef9f2 100%)}
+    .eyebrow{display:inline-block;color:#166758;background:#def4e6;padding:6px 14px;border:1px solid #bfe5ce;border-radius:100px;font-size:13px;font-weight:700}
+    h1{font-size:clamp(36px,5vw,64px);line-height:1.2;letter-spacing:-1.8px;margin:24px 0}.hero p{color:#52706a;max-width:620px;font-size:18px;margin:0 0 27px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 22px;display:inline-block;cursor:pointer;font-weight:700}.primary{background:#076a60;color:white;box-shadow:0 6px 15px #0e726528}.secondary{background:white;color:#135b53;border:1px solid #c6ddd4}.btn:hover{filter:brightness(.96)}
+    .hero-note{margin-top:22px;font-size:13px;color:#6b807b}
+    section{padding:66px 0} .section-heading{text-align:center;margin-bottom:30px}.section-heading h2{font-size:32px;line-height:1.3;margin:0 0 10px}.section-heading p{color:var(--muted);margin:0}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.feature{background:#fff;padding:25px;border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 22px #17312f06}
+    .feature .ico{width:46px;height:46px;border-radius:14px;background:var(--mint);display:grid;place-items:center;font-size:25px;margin-bottom:18px}.feature h3{margin:0 0 7px}.feature p{margin:0;color:var(--muted);font-size:14px}.tag{display:inline-block;background:#fdf3dc;color:#94671e;padding:2px 9px;border-radius:7px;font-size:12px;margin-top:14px}
+    .work{background:white;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.tool{padding:32px;border:1px solid var(--line);border-radius:20px;background:#fbfffc;max-width:850px;margin:auto}
+    .tool p{color:var(--muted)} .fields{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:10px}
+    label{font-weight:600;font-size:13px;display:block;color:#335b56;margin:0 0 5px}input{width:100%;border:1px solid #c6d9d3;border-radius:10px;background:white;padding:11px 12px;outline:none}input:focus{border-color:#0a826f;box-shadow:0 0 0 3px #0a826f19}
+    .tool-buttons{margin:16px 0 0;display:flex;gap:9px;flex-wrap:wrap}.warning{color:var(--warn);font-size:13px;margin-top:15px}
+    table{width:100%;border-collapse:collapse;margin-top:25px;background:white}th{text-align:left;color:#536f69;font-size:13px;font-weight:700;border-bottom:1px solid var(--line);padding:10px 9px}td{border-bottom:1px solid #edf3f1;padding:12px 9px;font-size:14px}td:last-child{text-align:right;color:#076a60;font-weight:700} .empty{padding:17px;color:var(--muted);text-align:center;border:1px dashed #ccdeda;border-radius:10px;margin-top:20px}.status{color:var(--teal);font-weight:700}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.step{padding:25px 22px;border-top:3px solid #54af9c;background:white;border-radius:0 0 13px 13px}.step b{font-size:14px;color:var(--teal)}.step h3{margin:10px 0}.step p{color:var(--muted);margin:0;font-size:14px}
+    footer{background:#173b35;color:#d5ebe3;padding:36px 0;font-size:13px}.footerflex{display:flex;align-items:start;justify-content:space-between;gap:20px}.footerflex a{text-decoration:underline}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.hero{padding:62px 0}.navlinks{gap:12px}}
+    @media(max-width:560px){.wrap{width:calc(100% - 30px)}.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.feature{padding:18px}nav{height:62px}.navlinks{font-size:12px}.tool{padding:20px}.footerflex{display:block}}
+  </style>
+</head>
+<body>
+  <header><nav class="wrap"><a href="./" class="brand"><img src="./app-icon.png" alt="慧购图标">慧购分析助手</a><div class="navlinks"><a href="#compare">体验比价</a><a href="#how">功能规划</a><a href="./privacy.html">隐私说明</a></div></nav></header>
+  <main>
+    <div class="hero"><div class="wrap"><span class="eyebrow">个人购物辅助工具 · 开发测试中</span><h1>更清楚的价格，<br>更有依据的选择。</h1>
+      <p>帮你比较同类商品的规格与单价。计划接入已获授权的商品搜索接口，结合买家评价、追评及个人结算页信息，让每一次购物更有把握。</p>
+      <div class="actions"><a href="#compare" class="btn primary">体验手动单价比较</a><a href="#how" class="btn secondary">了解开发计划</a></div>
+      <div class="hero-note">独立个人工具，尚未接入实时商品数据。与任何电商平台均无官方隶属关系。</div>
+    </div></div>
+    <section class="wrap"><div class="section-heading"><h2>关注影响购买决定的四个方面</h2><p>价格直观，评价透明，规格可比</p></div>
+      <div class="grid">
+        <article class="feature"><div class="ico">¥</div><h3>真实单价</h3><p>按相同规格核算商品单价，计划对比券后到手价格。</p><span class="tag">商品接口待接入</span></article>
+        <article class="feature"><div class="ico">★</div><h3>买家评价</h3><p>计划结合已公开的评价及追评，分析反复出现的质量问题。</p><span class="tag">数据范围待验证</span></article>
+        <article class="feature"><div class="ico">▣</div><h3>店铺信息</h3><p>对照店铺类型、销量和可查询的服务信息，辅助筛选。</p><span class="tag">商品接口待接入</span></article>
+        <article class="feature"><div class="ico">✓</div><h3>个人价格</h3><p>计划在用户授权后核实账号结算页显示的实际应付金额。</p><span class="tag">手机端方案测试中</span></article>
+      </div>
+    </section>
+    <section class="work" id="compare"><div class="wrap"><div class="section-heading"><h2>先体验手动比价</h2><p>录入你看到的商品价格与重量，立即按每公斤价格比较。所有计算在你的浏览器内完成。</p></div>
+      <div class="tool"><form id="compareForm"><div class="fields"><div><label for="name">商品名称</label><input id="name" placeholder="例如：A 店豆腐猫砂" maxlength="60" required></div>
+        <div><label for="price">实际付款价（元）</label><input id="price" type="number" step="0.01" min="0.01" max="999999" placeholder="例如 29.90" required></div>
+        <div><label for="weight">实收重量（公斤）</label><input id="weight" type="number" step="0.001" min="0.001" max="99999" placeholder="例如 10" required></div></div>
+        <div class="tool-buttons"><button class="btn primary" type="submit">添加并比较</button><button class="btn secondary" type="button" id="clear">清空当前比较</button></div></form>
+        <div id="result" aria-live="polite"><div class="empty">添加两件或更多同类商品，就能看到每公斤价格的比较结果。</div></div>
+        <p class="warning">提示：务必确认规格相同、净重真实以及运费和优惠券已计入。此处只做数学比较，不提供实时拼多多商品或买家评价。</p>
+      </div>
+    </div></section>
+    <section class="wrap" id="how"><div class="section-heading"><h2>接下来计划完善</h2><p>现阶段先建设公开官网，再逐项接入授权功能</p></div>
+      <div class="steps"><article class="step"><b>01 · 商品查询</b><h3>自动整理候选</h3><p>接入获准使用的多多客接口，查询可推广商品，核算优惠后的可比单价。</p></article>
+        <article class="step"><b>02 · 评价核查</b><h3>关注差评与追评</h3><p>在平台实际允许访问的范围内收集评价，明确标注采集条数和数据覆盖范围。</p></article>
+        <article class="step"><b>03 · 到手价验证</b><h3>核对个人结算价</h3><p>在用户授权及平台规则允许的条件下核实最终订单应付金额，不代用户支付。</p></article></div>
+    </section>
+  </main>
+  <footer><div class="wrap footerflex"><div><b>慧购分析助手</b><br>独立个人商品比较项目 · <span class="status" style="color:#abe3cc">公开测试版</span><br>© 2026 慧购分析助手</div>
+    <div>本站不收集、上传或保存上述手动比价的输入内容。<br><a href="./privacy.html">隐私与使用说明</a></div></div></footer>
+  <script>
+    (function(){
+      const rows=[];const result=document.getElementById("result");
+      const safe=t=>{const d=document.createElement("span");d.textContent=t;return d.innerHTML;};
+      const fmt=v=>Number(v).toFixed(2);
+      function render(){
+        if(!rows.length){result.innerHTML='<div class="empty">添加两件或更多同类商品，就能看到每公斤价格的比较结果。</div>';return}
+        rows.sort((a,b)=>a.price/a.weight-b.price/b.weight);
+        let html='<table><thead><tr><th>商品</th><th>付款价</th><th>净重</th><th>每公斤</th></tr></thead><tbody>';
+        rows.forEach((r,i)=>{html+='<tr><td>'+safe(r.name)+(i===0?' <span class="status">单价最低</span>':'')+'</td><td>¥'+fmt(r.price)+'</td><td>'+r.weight+' kg</td><td>¥'+fmt(r.price/r.weight)+'</td></tr>'});
+        result.innerHTML=html+'</tbody></table><p>已比较 '+rows.length+' 件商品。低单价商品仍需核实实际重量、评价及售后。</p>';
+      }
+      document.getElementById("compareForm").addEventListener("submit",e=>{
+        e.preventDefault();const name=document.getElementById("name").value.trim(),price=Number(document.getElementById("price").value),weight=Number(document.getElementById("weight").value);
+        if(!name||!Number.isFinite(price)||!Number.isFinite(weight)||price<=0||weight<=0)return;
+        rows.push({name,price,weight});render();e.target.reset();document.getElementById("name").focus();
+      });
+      document.getElementById("clear").addEventListener("click",()=>{rows.length=0;render()});
+    })();
+  </script>
+</body></html>
