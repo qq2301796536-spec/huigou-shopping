@@ -60,6 +60,7 @@ test("mocked DDK search: normalized response, signature and safe public result",
     assert.equal(args.keyword, "豆腐猫砂");
     assert.equal(args.page, "1");
     assert.equal(args.page_size, "20");
+    assert.equal(args.pid, "unit_pid");
     assert.equal(args.type, "pdd.ddk.goods.search");
     const sign = args.sign; delete args.sign;
     assert.equal(sign, signParams(args, testEnv.PDD_CLIENT_SECRET));
@@ -84,10 +85,13 @@ test("mocked DDK search: normalized response, signature and safe public result",
     assert.equal(calls, 1);
   } finally { globalThis.fetch = original; }
 });
-test("missing PID blocks promotion URL generation", async () => {
+test("missing PID blocks search and promotion URL generation", async () => {
   const env = {...testEnv}; delete env.PDD_PID;
-  const response = await worker.fetch(request("/api/link?goods_sign=abcdefgh123"), env);
-  assert.equal(response.status, 501);
+  const search = await worker.fetch(request("/api/search?q=豆腐猫砂"), env);
+  assert.equal(search.status, 503);
+  assert.equal((await search.json()).error, "PDD_PID_REQUIRED");
+  const link = await worker.fetch(request("/api/link?goods_sign=abcdefgh123"), env);
+  assert.equal(link.status, 503);
 });
 test("mocked link generation returns only approved HTTPS domains", async () => {
   const original = globalThis.fetch;
@@ -142,5 +146,18 @@ test("platform subcode 20001 becomes actionable account-binding error", async ()
     const response = await worker.fetch(request("/api/search?q=商品绑定"), testEnv);
     assert.equal(response.status, 502);
     assert.equal((await response.json()).error, "PDD_ACCOUNT_BINDING_REQUIRED");
+  } finally { globalThis.fetch = original; }
+});
+
+test("platform subcode 60001 requires authorized promotion PID", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    error_response: { error_code: 50001, sub_code: "60001",
+      sub_msg: "registered pid/custom_parameters required" }
+  }), {status:200});
+  try {
+    const response = await worker.fetch(request("/api/search?q=备案查询"), testEnv);
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, "PDD_PID_AUTH_REQUIRED");
   } finally { globalThis.fetch = original; }
 });

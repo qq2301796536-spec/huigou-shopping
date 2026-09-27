@@ -125,14 +125,20 @@
       const desc = err.message === "TOO_MANY_REQUESTS" ? "操作太频繁，请稍后重试。"
         : err.message === "PDD_ACCOUNT_BINDING_REQUIRED"
           ? "多多进宝账号尚未绑定当前应用的 Client ID，请完成绑定后重试。"
+        : err.message === "PDD_PID_AUTH_REQUIRED"
+          ? "应用已绑定，但还需要使用已备案的推广位 PID 查询，请完成推广位授权备案后重试。"
+        : err.message === "PDD_PID_REQUIRED"
+          ? "请先配置与当前应用绑定的推广位 PID。"
         : /^PDD_API_/.test(err.message) ? "商品接口返回错误 " + err.message + "，需核对平台权限。"
         : "暂时无法查询商品。请核对后端部署、密钥及接口权限。";
       msg(desc, "error");
-      if (err.message === "PDD_ACCOUNT_BINDING_REQUIRED") {
+      if (["PDD_ACCOUNT_BINDING_REQUIRED","PDD_PID_AUTH_REQUIRED","PDD_PID_REQUIRED"].includes(err.message)) {
+        const isApp = err.message === "PDD_ACCOUNT_BINDING_REQUIRED";
         const help = document.createElement("a");
-        help.href = "https://jinbao.pinduoduo.com/third-party/rank";
+        help.href = isApp ? "https://jinbao.pinduoduo.com/third-party/rank"
+          : "https://jinbao.pinduoduo.com/qa-system?questionId=204";
         help.target = "_blank"; help.rel = "noopener noreferrer";
-        help.textContent = "打开多多进宝绑定页面";
+        help.textContent = isApp ? "打开多多进宝应用绑定页面" : "查看官方推广位备案说明";
         status.appendChild(help);
       }
     } finally {
@@ -156,7 +162,16 @@
       const info = await response.json();
       if (!response.ok || info.service !== "huigou-ddk-api") throw new Error("INVALID_BACKEND");
       if (!info.configured) return msg("后端已经部署，正在等待安全配置 API 凭据。");
-      linksAvailable = Boolean(info.links);
+      if (!info.links) {
+        msg("应用凭据已配置，仍需设置已授权备案的推广位 PID。", "error");
+        const help = document.createElement("a");
+        help.href = "https://jinbao.pinduoduo.com/qa-system?questionId=204";
+        help.target = "_blank"; help.rel = "noopener noreferrer";
+        help.textContent = "查看官方推广位备案说明";
+        status.appendChild(help);
+        return;
+      }
+      linksAvailable = true;
       submit.disabled = false;
       msg("搜索后端已连接。实际可用性以平台接口返回为准。", "ok");
     } catch { msg("搜索服务尚未就绪，可先使用下方手动比价。", "error"); }

@@ -73,6 +73,8 @@ async function callPdd(type, args, env) {
     const sub = String(result.error_response.sub_code || "").replace(/[^0-9]/g, "").slice(0, 8);
     if (code === 50001 && sub === "20001")
       throw new Error("PDD_ACCOUNT_BINDING_REQUIRED");
+    if (code === 50001 && sub === "60001")
+      throw new Error("PDD_PID_AUTH_REQUIRED");
     throw new Error("PDD_API_" + code);
   }
   return result;
@@ -100,6 +102,8 @@ export default {
       return json({ error: "NOT_FOUND" }, 404, headers);
     if (!env.PDD_CLIENT_ID || !env.PDD_CLIENT_SECRET)
       return json({ error: "CONFIG_REQUIRED" }, 503, headers);
+    if (!env.PDD_PID)
+      return json({ error: "PDD_PID_REQUIRED" }, 503, headers);
     if (!rateLimit(request)) return json({ error: "TOO_MANY_REQUESTS" }, 429, headers);
     try {
       if (url.pathname === "/api/search") {
@@ -112,7 +116,7 @@ export default {
         const key = JSON.stringify([keyword, page, listId]), now = Date.now();
         const cached = cache.get(key);
         if (cached && now - cached.when < 45_000) return json(cached.data, 200, headers);
-        const args = { keyword, page, page_size: 20 };
+        const args = { keyword, page, page_size: 20, pid: env.PDD_PID };
         if (page > 1 && listId) args.list_id = listId;
         const raw = await callPdd("pdd.ddk.goods.search", args, env);
         if (!raw.goods_search_response || !Array.isArray(raw.goods_search_response.goods_list))
@@ -125,7 +129,6 @@ export default {
         if (cache.size > 300) cache.clear();
         return json(result, 200, headers);
       }
-      if (!env.PDD_PID) return json({ error: "PID_REQUIRED" }, 501, headers);
       const goodsSign = (url.searchParams.get("goods_sign") || "").trim();
       if (!/^[a-zA-Z0-9_+/=-]{8,256}$/.test(goodsSign))
         return json({ error: "GOODS_SIGN_INVALID" }, 400, headers);
@@ -143,7 +146,8 @@ export default {
     } catch (err) {
       const code = /^PDD_(HTTP|API)_[0-9]+$/.test(err.message) ||
         ["PDD_SIGN_FAILURE", "PDD_FETCH_FAILURE", "PDD_TIMEOUT",
-         "PDD_JSON_FAILURE", "PDD_FORMAT", "PDD_ACCOUNT_BINDING_REQUIRED"].includes(err.message)
+         "PDD_JSON_FAILURE", "PDD_FORMAT", "PDD_ACCOUNT_BINDING_REQUIRED",
+         "PDD_PID_AUTH_REQUIRED"].includes(err.message)
         ? err.message : "UPSTREAM_UNAVAILABLE";
       return json({ error: code }, 502, headers);
     }
